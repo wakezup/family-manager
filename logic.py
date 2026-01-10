@@ -941,9 +941,15 @@ def lifecycle(level: int = 1, path: str = "db.txt",
                             break
 
                     # file - перемещает пользователя на 3 уровень.
+                    # После того, как программа вернется на второй уровень,
+                    # снова считывает файл в исходный объект, для того, чтобы
+                    # сразу отобразить изменения, произошедшие на 3 уровне.
                     case "file":
                         if confirmation_request():
                             lifecycle(3, path, obj)
+                            obj = tasks.Tasks.read(path)
+                            temp_obj = obj.copy()
+                            temp_obj.print()
 
                     # После чтения файла пользователь перемещается в 2 уровень
                     case "path":
@@ -970,25 +976,22 @@ def lifecycle(level: int = 1, path: str = "db.txt",
                     case "help":
                         print(interface.text["help_"+str(level)])
 
-                    # save - перезаписывает исходный объект, копируя временный
+                    # Записывает временный объект в выбранный файл.
                     case "save":
                         if level == 2:
                             new_path = path_request(path)
                             if new_path is not None:
                                 if confirmation_request("path_"):
                                     temp_obj.write(new_path)
-                                    obj = temp_obj.copy()
                         else:
                             print(f"База данных будет записана в: {path}")
                             if confirmation_request("path_"):
                                 temp_obj.write(path)
-                                obj = temp_obj.copy()
                             else:
                                 new_path = path_request()
                                 if new_path is not None:
                                     if confirmation_request("path_"):
                                         temp_obj.write(new_path)
-                                        obj = temp_obj.copy()
 
                     case "remove":
                         index = id_request(temp_obj)
