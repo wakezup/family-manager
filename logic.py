@@ -109,27 +109,17 @@ def string(max_space: list, labels: list) -> str:
     return string
 
 
-def condition(item: int, rvalue: str | int,
-              lvalue: str | int, parse: bool) -> bool:
+def condition(item: int, rvalue: str | int, lvalue: str | int) -> bool:
     '''Формирование условия для поиска по объекту класса Tasks.
 
     > item - индекс атрибута задачи
     > rvalue - правое значение для сравнения
     > lvalue - левое значение для сравнения
-    > parse - логическая переменная, определяющая, как именно
-    будет сформировано условие для поиска, подается из функции
-    tasks.Tasks.get().
 
     Возвращает булево значение (True/False) являющееся результатом
     проверки соответствующего условия.
     '''
     match item:
-        # Проверка дат ( 1 - дата получения, 3 - дата выполнения )
-        case 1 | 3:
-            if parse:
-                return rvalue == lvalue
-            else:
-                return rvalue >= lvalue
         # Особое условие для статуса объясняется необходимостью,
         # найти все задачи, находящиеся на исполнении (В процессе, Получена)
         # в function_3()
@@ -265,7 +255,7 @@ def command_mask(command: str) -> None:
     syntax = ["quit", "id", "help", "date", "file",
               "executor", "task", "get_date", "path",
               "get_time", "do_date", "do_time",
-              "status", "function", "sort", "show",
+              "status", "sort", "show",
               "save", "remove", "add", "edit"]
 
     if command not in syntax:
@@ -289,7 +279,7 @@ def level_mask(command: str, level: int) -> None:
                        "id", "get_date", "get_time",
                        "do_date", "do_time", "executor",
                        "task", "status", "remove", "edit",
-                       "function", "sort", "show"],
+                       "sort", "show"],
 
                       ["quit", "save", "help", "show",
                        "edit", "add", "remove"]]
@@ -865,9 +855,12 @@ def function_1(obj: tasks.Tasks, days: int, curr_date: str):
     Возвращает отсортированную копию объекта класса Tasks из модуля tasks.
     '''
     last_date = get_last_date(days, curr_date)
-    # Получение списка задач, дата получения которых >= last_date.
-    to_sort = obj.get(1, last_date)
+    to_sort = tasks.Tasks()
 
+    for task in obj.list:
+        if last_date <= task[1] <= curr_date:
+            to_sort.list.append(task)
+    
     shell.sort(to_sort, (1, 7), reverse1=True, reverse2=True)
 
     return to_sort
@@ -1021,10 +1014,12 @@ def lifecycle(level: int = 1, path: str = "db.txt",
 
                         temp_obj.print()
 
-                    case "function":
+                    case "sort":
+                        print(interface.text["function_1"])
+                        print(interface.text["function_2"])
+                        print(interface.text["function_3"])
                         function = function_request()
                         if function is not None:
-                            print(interface.text["function_"+function])
                             if function == "1":
                                 date_and_day = date_and_day_request()
                                 if date_and_day is not None:
@@ -1036,18 +1031,8 @@ def lifecycle(level: int = 1, path: str = "db.txt",
                                 if executor is not None:
                                     temp_obj = function_2(obj, executor)
                             elif function == "3":
-                                input(interface.text["press_enter"])
                                 temp_obj = function_3(obj)
 
-                        temp_obj.print()
-
-                    case "sort":
-                        key1 = key_request(1)
-                        if key1 is not None:
-                            key2 = key_request(2)
-                            if key2 is not None:
-                                shell.sort(temp_obj, (key1[0], key2[0]),
-                                           reverse1=key1[1], reverse2=key2[1])
                         temp_obj.print()
 
                     # Далее все команды возвращают вхождения задач,
@@ -1062,7 +1047,7 @@ def lifecycle(level: int = 1, path: str = "db.txt",
                     case "get_date":
                         get_date = date_request()
                         if get_date is not None:
-                            temp_obj = obj.get(1, get_date, parse=True)
+                            temp_obj = obj.get(1, get_date)
 
                         temp_obj.print()
 

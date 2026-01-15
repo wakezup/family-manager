@@ -264,16 +264,12 @@ class Tasks:
         else:
             print("Список задач пуст!")
 
-    def get(self, item: int, value: str | int, parse: bool = False):
+    def get(self, item: int, value: str | int):
         '''Получение копии объекта с задачами, подходящими по условию.
 
         > self - ссылка на объект
         > item - индекс атрибута в задаче, по которому задается условие
         > value - значение атрибута, по которому задается условие
-        > parse - режим проверки условия для случаев, если в качестве условия
-        используется атрибут 'Дата получения' или 'Дата выполнения',
-        (по умолчанию) False: условие соблюдено если дата задачи >= заданная,
-        True: условие соблюдено только если дата задачи == заданная дата.
 
         Создается новый объект, задачи, подходящие по условию добавляются
         в список задач нового объекта в виде копий.
@@ -284,7 +280,7 @@ class Tasks:
         tasklist = Tasks()
 
         for task in self.list:
-            if log.condition(item, task[item], value, parse):
+            if log.condition(item, task[item], value):
                 tasklist.list.append(task[:])
 
         return tasklist
